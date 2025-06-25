@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.emailmanager.mapper.SpamRuleMapper">
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.emailmanager.entity.SpamRule">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="rule_name" property="ruleName"/>
+        <result column="rule_type" property="ruleType"/>
+        <result column="rule_content" property="ruleContent"/> <!-- 修正：从 rule_value 改为 rule_content -->
+        <result column="is_global" property="isGlobal"/>
+        <result column="status" property="status"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id, rule_name, rule_type, rule_content, is_global, status, created_time, updated_time <!-- 修正：从 rule_value 改为 rule_content -->
+    </sql>
+
+    <!-- 插入垃圾邮件规则 -->
+    <insert id="insert" parameterType="com.emailmanager.entity.SpamRule" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO spam_rules (
+        user_id, rule_name, rule_type, rule_content, is_global, status, created_time, updated_time <!-- 修正：从 rule_value 改为 rule_content -->
+        ) VALUES (
+        #{userId}, #{ruleName}, #{ruleType}, #{ruleContent}, #{isGlobal}, #{status}, NOW(), NOW() <!-- 修正：从 ruleValue 改为 ruleContent -->
+        )
+    </insert>
+
+    <!-- 根据ID查询垃圾邮件规则 -->
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM spam_rules
+        WHERE id = #{id}
+    </select>
+
+    <!-- 更新垃圾邮件规则 -->
+    <update id="update" parameterType="com.emailmanager.entity.SpamRule">
+        UPDATE spam_rules
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="ruleName != null">rule_name = #{ruleName},</if>
+            <if test="ruleType != null">rule_type = #{ruleType},</if>
+            <if test="ruleContent != null">rule_content = #{ruleContent},</if> <!-- 修正：从 ruleValue 改为 ruleContent -->
+            <if test="isGlobal != null">is_global = #{isGlobal},</if>
+            <if test="status != null">status = #{status},</if>
+            updated_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除垃圾邮件规则 -->
+    <delete id="deleteById">
+        DELETE FROM spam_rules WHERE id = #{id}
+    </delete>
+
+    <!-- 查询所有垃圾邮件规则 -->
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM spam_rules
+        ORDER BY id DESC
+    </select>
+
+    <!-- 根据用户ID查询个人垃圾邮件规则 -->
+    <select id="findByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM spam_rules
+        WHERE user_id = #{userId} AND is_global = 0
+        ORDER BY created_time DESC
+    </select>
+
+    <!-- 查询所有全局垃圾邮件规则 -->
+    <select id="findGlobalRules" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM spam_rules
+        WHERE is_global = 1
+        ORDER BY created_time DESC
+    </select>
+
+    <!-- 新增：根据用户ID、规则类型和规则内容查询单个规则 -->
+    <select id="findByUserIdAndRule" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM spam_rules
+        WHERE user_id = #{userId}
+        AND rule_type = #{ruleType}
+        AND rule_content = #{ruleContent} <!-- 修正：从 ruleValue 改为 ruleContent -->
+        LIMIT 1
+    </select>
+
+    <!-- 新增：更新垃圾邮件规则状态 -->
+    <update id="updateStatus">
+        UPDATE spam_rules
+        SET status = #{status},
+            updated_time = NOW()
+        WHERE id = #{id}
+    </update>
+</mapper>

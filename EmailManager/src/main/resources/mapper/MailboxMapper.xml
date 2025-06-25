@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.emailmanager.mapper.MailboxMapper">
+
+    <resultMap id="MailboxWithEmailResultMap" type="com.emailmanager.entity.Mailbox">
+        <id property="id" column="m_id"/>
+        <result property="userId" column="m_user_id"/>
+        <result property="emailId" column="m_email_id"/>
+        <result property="folder" column="m_folder"/>
+        <result property="isRead" column="m_is_read"/>
+        <result property="isStarred" column="m_is_starred"/>
+        <result property="updatedTime" column="m_updated_time"/>
+        <association property="email" javaType="com.emailmanager.entity.Email">
+            <id property="id" column="e_id"/>
+            <result property="senderId" column="e_sender_id"/>
+            <result property="subject" column="e_subject"/>
+            <result property="status" column="e_status"/>
+            <result property="createdTime" column="e_created_time"/>
+            <result property="updatedTime" column="e_updated_time"/>
+            <result property="toRecipients" column="to_recipients_str"/>
+            <association property="sender" javaType="com.emailmanager.entity.User">
+                <id property="id" column="sender_id"/>
+                <result property="username" column="sender_username"/>
+                <result property="realName" column="sender_real_name"/>
+                <result property="email" column="sender_email"/>
+            </association>
+        </association>
+    </resultMap>
+
+    <sql id="Mailbox_With_Email_Columns">
+        m.id as m_id,
+        m.user_id as m_user_id,
+        m.email_id as m_email_id,
+        m.folder as m_folder,
+        m.is_read as m_is_read,
+        m.is_starred as m_is_starred,
+        m.updated_time as m_updated_time,
+        e.id as e_id,
+        e.sender_id as e_sender_id,
+        e.subject as e_subject,
+        e.status as e_status,
+        e.created_time as e_created_time,
+        e.updated_time as e_updated_time,
+        sender.username as sender_username,
+        sender.real_name as sender_real_name,
+        sender.email as sender_email
+    </sql>
+
+    <insert id="insert" parameterType="com.emailmanager.entity.Mailbox" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO mailbox (user_id, email_id, folder, is_read, is_starred)
+        VALUES (#{userId}, #{emailId}, #{folder}, #{isRead, jdbcType=TINYINT}, #{isStarred, jdbcType=TINYINT})
+    </insert>
+
+    <update id="update" parameterType="com.emailmanager.entity.Mailbox">
+        UPDATE mailbox
+        <set>
+            <if test="folder != null">folder = #{folder},</if>
+            <if test="isRead != null">is_read = #{isRead},</if>
+            <if test="isStarred != null">is_starred = #{isStarred},</if>
+            updated_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="findByUserIdAndEmailId" resultType="com.emailmanager.entity.Mailbox">
+        SELECT id, user_id, email_id, folder, is_read, is_starred, created_time, updated_time
+        FROM mailbox
+        WHERE user_id = #{userId} AND email_id = #{emailId}
+    </select>
+
+    <select id="findById" resultType="com.emailmanager.entity.Mailbox">
+        SELECT id, user_id, email_id, folder, is_read, is_starred, created_time, updated_time
+        FROM mailbox
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByUserIdAndFolder" resultMap="MailboxWithEmailResultMap">
+        SELECT
+        <include refid="Mailbox_With_Email_Columns"/>,
+        (SELECT GROUP_CONCAT(er.recipient_email SEPARATOR ', ') FROM email_recipients er WHERE er.email_id = e.id AND er.recipient_type = 'TO') as to_recipients_str
+        FROM mailbox m
+        JOIN emails e ON m.email_id = e.id
+        LEFT JOIN users sender ON e.sender_id = sender.id
+        WHERE m.user_id = #{userId} AND m.folder = #{folder}
+        ORDER BY e.created_time DESC
+    </select>
+
+    <select id="findStarredByUserId" resultMap="MailboxWithEmailResultMap">
+        SELECT
+        <include refid="Mailbox_With_Email_Columns"/>,
+        (SELECT GROUP_CONCAT(er.recipient_email SEPARATOR ', ') FROM email_recipients er WHERE er.email_id = e.id AND er.recipient_type = 'TO') as to_recipients_str
+        FROM mailbox m
+        JOIN emails e ON m.email_id = e.id
+        LEFT JOIN users sender ON e.sender_id = sender.id
+        WHERE m.user_id = #{userId} AND m.is_starred = 1 AND m.folder != 'TRASH'
+        ORDER BY e.created_time DESC
+    </select>
+
+    <select id="findSentMailboxEntriesByUserId" resultMap="MailboxWithEmailResultMap">
+        SELECT
+        <include refid="Mailbox_With_Email_Columns"/>,
+        (SELECT GROUP_CONCAT(er.recipient_email SEPARATOR ', ')
+        FROM email_recipients er
+        WHERE er.email_id = e.id AND er.recipient_type = 'TO') as to_recipients_str
+        FROM mailbox m
+        JOIN emails e ON m.email_id = e.id
+        LEFT JOIN users sender ON e.sender_id = sender.id
+        WHERE
+        m.user_id = #{userId}
+        AND m.folder = 'SENT'
+        ORDER BY m.updated_time DESC
+    </select>
+
+    <delete id="deleteByEmailId">
+        DELETE FROM mailbox WHERE email_id = #{emailId}
+    </delete>
+
+    <select id="searchByKeyword" resultMap="MailboxWithEmailResultMap">
+        SELECT
+        <include refid="Mailbox_With_Email_Columns"/>,
+        (SELECT GROUP_CONCAT(er.recipient_email SEPARATOR ', ')
+        FROM email_recipients er
+        WHERE er.email_id = e.id AND er.recipient_type = 'TO') as to_recipients_str
+        FROM mailbox m
+        JOIN emails e ON m.email_id = e.id
+        LEFT JOIN users sender ON e.sender_id = sender.id <!-- 核心修改：别名统一为 sender -->
+        WHERE m.user_id = #{userId}
+        AND (
+        e.subject LIKE CONCAT('%', #{keyword}, '%')
+        OR e.content LIKE CONCAT('%', #{keyword}, '%')
+        OR sender.real_name LIKE CONCAT('%', #{keyword}, '%') <!-- 核心修改：使用 sender. -->
+        OR sender.email LIKE CONCAT('%', #{keyword}, '%')    <!-- 核心修改：使用 sender. -->
+        )
+        ORDER BY e.created_time DESC
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM mailbox WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByUserIdAndFolder">
+        DELETE FROM mailbox
+        WHERE user_id = #{userId} AND folder = #{folder}
+    </delete>
+
+
+    <select id="findAllByUserIdAndEmailId" resultType="com.emailmanager.entity.Mailbox">
+        SELECT * FROM mailbox WHERE user_id = #{userId} AND email_id = #{emailId}
+    </select>
+</mapper>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!-- 全局设置 -->
+    <settings>
+        <!-- 使用驼峰命名转换 -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!-- 开启二级缓存 -->
+        <setting name="cacheEnabled" value="true"/>
+        <!-- 延迟加载的全局开关 -->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <!-- 设置积极加载策略 -->
+        <setting name="aggressiveLazyLoading" value="false"/>
+        <!-- 设置默认执行器 -->
+        <setting name="defaultExecutorType" value="SIMPLE"/>
+        <!-- 设置超时时间 -->
+        <setting name="defaultStatementTimeout" value="25000"/>
+        <!-- 允许 JDBC 支持自动生成主键 -->
+        <setting name="useGeneratedKeys" value="true"/>
+        <!-- 指定 MyBatis 所用日志的具体实现 -->
+        <setting name="logImpl" value="SLF4J"/>
+    </settings>
+
+    <!-- 类型别名 -->
+    <typeAliases>
+        <!-- 扫描实体类包，自动注册别名 -->
+        <package name="com.emailmanager.entity"/>
+    </typeAliases>
+
+    <!-- 类型处理器 -->
+    <typeHandlers>
+        <!-- 处理 Java 8 日期时间类型 -->
+        <typeHandler handler="org.apache.ibatis.type.LocalDateTimeTypeHandler"/>
+        <typeHandler handler="org.apache.ibatis.type.LocalDateTypeHandler"/>
+        <typeHandler handler="org.apache.ibatis.type.LocalTimeTypeHandler"/>
+    </typeHandlers>
+
+</configuration> 

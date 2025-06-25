@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.emailmanager.mapper.EmailAttachmentMapper">
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.emailmanager.entity.EmailAttachment">
+        <id column="id" property="id"/>
+        <result column="email_id" property="emailId"/>
+        <result column="file_name" property="fileName"/>
+        <result column="file_path" property="filePath"/>
+        <result column="file_type" property="fileType"/>
+        <result column="file_size" property="fileSize"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/> <!-- 新增映射 -->
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, email_id, file_name, file_path, file_type, file_size, created_time, updated_time
+    </sql>
+
+    <!-- 插入邮件附件 -->
+    <insert id="insert" parameterType="com.emailmanager.entity.EmailAttachment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO email_attachments (
+            email_id, file_name, file_path, file_type, file_size, created_time, updated_time
+        ) VALUES (
+                     #{emailId}, #{fileName}, #{filePath}, #{fileType}, #{fileSize}, NOW(), NOW()
+                 )
+    </insert>
+
+    <!-- 根据ID查询邮件附件 -->
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM email_attachments
+        WHERE id = #{id}
+    </select>
+
+    <!-- 更新邮件附件 -->
+    <update id="update" parameterType="com.emailmanager.entity.EmailAttachment">
+        UPDATE email_attachments
+        <set>
+            <if test="emailId != null">email_id = #{emailId},</if>
+            <if test="fileName != null">file_name = #{fileName},</if>
+            <if test="filePath != null">file_path = #{filePath},</if>
+            <if test="fileType != null">file_type = #{fileType},</if>
+            <if test="fileSize != null">file_size = #{fileSize},</if>
+            updated_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除邮件附件 -->
+    <delete id="deleteById">
+        DELETE FROM email_attachments WHERE id = #{id}
+    </delete>
+
+    <!-- 查询所有邮件附件 -->
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM email_attachments
+        ORDER BY id DESC
+    </select>
+
+    <!-- 根据邮件ID查询附件列表 -->
+    <select id="findByEmailId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM email_attachments
+        WHERE email_id = #{emailId}
+        ORDER BY created_time DESC
+    </select>
+
+    <!-- 根据邮件ID删除所有附件 (新增映射) -->
+    <delete id="deleteByEmailId">
+        DELETE FROM email_attachments WHERE email_id = #{emailId}
+    </delete>
+</mapper>

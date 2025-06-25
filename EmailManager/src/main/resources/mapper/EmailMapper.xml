@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.emailmanager.mapper.EmailMapper">
+
+    <!-- 核心修改：更新ResultMap以包含sender对象 -->
+    <resultMap id="EmailWithDetailsResultMap" type="com.emailmanager.entity.Email">
+        <id property="id" column="e_id"/>
+        <result property="senderId" column="e_sender_id"/>
+        <result property="subject" column="e_subject"/>
+        <result property="content" column="e_content"/>
+        <result property="isHtml" column="e_is_html"/>
+        <result property="status" column="e_status"/>
+        <result property="createdTime" column="e_created_time"/>
+        <result property="updatedTime" column="e_updated_time"/>
+        <!-- 关联发件人信息 -->
+        <association property="sender" javaType="com.emailmanager.entity.User">
+            <id property="id" column="sender_id"/>
+            <result property="username" column="sender_username"/>
+            <result property="realName" column="sender_real_name"/>
+            <result property="email" column="sender_email"/>
+        </association>
+        <!-- 关联附件列表 -->
+        <collection property="attachments" ofType="com.emailmanager.entity.EmailAttachment">
+            <id property="id" column="att_id"/>
+            <result property="fileName" column="att_file_name"/>
+            <result property="filePath" column="att_file_path"/>
+            <result property="fileSize" column="att_file_size"/>
+            <result property="fileType" column="att_file_type"/>
+        </collection>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.emailmanager.entity.Email" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO emails (sender_id, subject, content, is_html, status)
+        VALUES (#{senderId}, #{subject}, #{content}, #{isHtml, jdbcType=TINYINT}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.emailmanager.entity.Email">
+        UPDATE emails
+        <set>
+            <if test="subject != null">subject = #{subject},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="isHtml != null">is_html = #{isHtml},</if>
+            <if test="status != null">status = #{status},</if>
+            updated_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 核心修改：更新查询语句以JOIN三张表 -->
+    <select id="findWithAttachmentsById" resultMap="EmailWithDetailsResultMap">
+        SELECT
+            e.id as e_id,
+            e.sender_id as e_sender_id,
+            e.subject as e_subject,
+            e.content as e_content,
+            e.is_html as e_is_html,
+            e.status as e_status,
+            e.created_time as e_created_time,
+            e.updated_time as e_updated_time,
+
+            u.id as sender_id,
+            u.username as sender_username,
+            u.real_name as sender_real_name,
+            u.email as sender_email,
+
+            a.id as att_id,
+            a.file_name as att_file_name,
+            a.file_path as att_file_path,
+            a.file_size as att_file_size,
+            a.file_type as att_file_type
+        FROM emails e
+                 LEFT JOIN users u ON e.sender_id = u.id
+                 LEFT JOIN email_attachments a ON e.id = a.email_id
+        WHERE e.id = #{id}
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM emails WHERE id = #{id}
+    </delete>
+
+</mapper>

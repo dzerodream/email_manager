@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.emailmanager.mapper.EmailRecipientMapper">
+
+    <insert id="batchInsert">
+        INSERT INTO email_recipients (email_id, recipient_email, recipient_type) VALUES
+        <foreach collection="recipients" item="item" separator=",">
+            (#{item.emailId}, #{item.recipientEmail}, #{item.recipientType})
+        </foreach>
+    </insert>
+
+    <select id="findByEmailId" resultType="com.emailmanager.entity.EmailRecipient">
+        SELECT * FROM email_recipients WHERE email_id = #{emailId}
+    </select>
+
+</mapper>

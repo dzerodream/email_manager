@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.emailmanager.mapper.HolidayMapper">
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.emailmanager.entity.Holiday">
+        <id column="id" property="id"/>
+        <result column="name" property="holidayName"/>
+        <result column="holiday_date" property="holidayDate"/>
+        <result column="is_workday" property="isWorkday"/>
+        <result column="description" property="description"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, holiday_date, is_workday, description, created_time, updated_time
+    </sql>
+
+    <!-- 插入节假日 -->
+    <insert id="insert" parameterType="com.emailmanager.entity.Holiday" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO holidays (
+            name, holiday_date, is_workday, description, created_time, updated_time
+        ) VALUES (
+            #{holidayName}, #{holidayDate}, #{isWorkday}, #{description}, NOW(), NOW()
+        )
+    </insert>
+
+    <!-- 根据ID查询节假日 -->
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM holidays
+        WHERE id = #{id}
+    </select>
+
+    <!-- 更新节假日 -->
+    <update id="update" parameterType="com.emailmanager.entity.Holiday">
+        UPDATE holidays
+        <set>
+            <if test="holidayName != null">name = #{holidayName},</if>
+            <if test="holidayDate != null">holiday_date = #{holidayDate},</if>
+            <if test="isWorkday != null">is_workday = #{isWorkday},</if>
+            <if test="description != null">description = #{description},</if>
+            updated_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除节假日 -->
+    <delete id="deleteById">
+        DELETE FROM holidays WHERE id = #{id}
+    </delete>
+
+    <!-- 查询所有节假日 -->
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM holidays
+        ORDER BY holiday_date DESC
+    </select>
+
+    <!-- 根据日期范围查询节假日 -->
+    <select id="findByDateRange" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM holidays
+        WHERE holiday_date BETWEEN #{startDate} AND #{endDate}
+        ORDER BY holiday_date ASC
+    </select>
+
+    <!-- 根据具体日期查询节假日 -->
+    <select id="findByDate" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM holidays
+        WHERE holiday_date = #{date}
+        LIMIT 1
+    </select>
+
+    <!-- 根据是否工作日查询节假日 -->
+    <select id="findByIsWorkday" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM holidays
+        WHERE is_workday = #{isWorkday}
+        ORDER BY holiday_date ASC
+    </select>
+
+    <!-- 根据年份查询节假日 -->
+    <select id="findByYear" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM holidays
+        WHERE YEAR(holiday_date) = #{year}
+        ORDER BY holiday_date ASC
+    </select>
+</mapper> 

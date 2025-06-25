@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.emailmanager.mapper.ContactMapper">
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.emailmanager.entity.Contact">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="name" property="name"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="birthday" property="birthday"/>
+        <result column="remark" property="remark"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id, name, email, phone, birthday, remark, created_time, updated_time
+    </sql>
+
+    <!-- 插入联系人 -->
+    <insert id="insert" parameterType="com.emailmanager.entity.Contact" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO contacts (
+            user_id, name, email, phone, birthday, remark, created_time, updated_time
+        ) VALUES (
+            #{userId}, #{name}, #{email}, #{phone}, #{birthday}, #{remark}, NOW(), NOW()
+        )
+    </insert>
+
+    <!-- 根据ID查询联系人 -->
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contacts
+        WHERE id = #{id} AND user_id = #{userId}
+    </select>
+
+    <!-- 更新联系人 -->
+    <update id="update" parameterType="com.emailmanager.entity.Contact">
+        UPDATE contacts
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="birthday != null">birthday = #{birthday},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            updated_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除联系人 -->
+    <delete id="deleteById">
+        DELETE FROM contacts WHERE id = #{id} AND user_id = #{userId}
+    </delete>
+
+    <!-- 查询所有联系人 -->
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contacts
+        ORDER BY id DESC
+    </select>
+
+    <!-- 根据用户ID查询联系人列表 -->
+    <select id="findByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contacts
+        WHERE user_id = #{userId}
+        ORDER BY name ASC
+    </select>
+
+    <!-- 根据用户ID和名称搜索联系人 -->
+    <select id="searchByName" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contacts
+        WHERE user_id = #{userId}
+        AND name LIKE CONCAT('%', #{name}, '%')
+        ORDER BY name ASC
+    </select>
+
+    <!-- 根据用户ID和邮箱搜索联系人 -->
+    <select id="searchByEmail" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contacts
+        WHERE user_id = #{userId}
+        AND email LIKE CONCAT('%', #{email}, '%')
+        ORDER BY email ASC
+    </select>
+
+    <!-- 根据用户ID和邮箱查找联系人 -->
+    <select id="findByEmail" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contacts
+        WHERE user_id = #{userId}
+        AND email = #{email}
+        LIMIT 1
+    </select>
+
+    <!-- 检查邮箱是否已存在 -->
+    <select id="isEmailExists" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM contacts
+        WHERE user_id = #{userId}
+        AND email = #{email}
+    </select>
+
+    <!-- 根据月份查询联系人生日 -->
+    <select id="findBirthdaysByMonth" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contacts
+        WHERE user_id = #{userId}
+        AND birthday IS NOT NULL
+        AND MONTH(birthday) = #{month}
+        ORDER BY DAY(birthday)
+    </select>
+
+    <!-- 查询未来一段时间内即将到来的生日 -->
+    <!-- 查询未来一段时间内即将到来的生日 -->
+    <select id="findUpcomingBirthdays" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contacts
+        WHERE user_id = #{userId}
+        AND birthday IS NOT NULL
+        AND <![CDATA[
+        (
+            (MONTH(birthday) = MONTH(#{startDate}) AND DAY(birthday) >= DAY(#{startDate}))
+            OR (MONTH(birthday) > MONTH(#{startDate}) AND MONTH(birthday) <= MONTH(#{endDate}))
+        )
+    ]]>
+        ORDER BY MONTH(birthday), DAY(birthday)
+    </select>
+
+    <!-- 查询今天过生日的联系人 -->
+    <select id="findTodayBirthdays" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contacts
+        WHERE user_id = #{userId}
+        AND birthday IS NOT NULL
+        AND MONTH(birthday) = MONTH(CURDATE())
+        AND DAY(birthday) = DAY(CURDATE())
+        ORDER BY name
+    </select>
+</mapper> 

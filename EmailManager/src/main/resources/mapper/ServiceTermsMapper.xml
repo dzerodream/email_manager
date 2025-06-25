@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.emailmanager.mapper.ServiceTermsMapper">
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.emailmanager.entity.ServiceTerms">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="version" property="version"/>
+        <result column="status" property="status"/>
+        <result column="effective_date" property="effectiveDate"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, title, content, version, status, effective_date, created_time, updated_time
+    </sql>
+
+    <!-- 插入服务条款 -->
+    <insert id="insert" parameterType="com.emailmanager.entity.ServiceTerms" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO service_terms (
+            title,
+            content,
+            version,
+            status,
+            effective_date
+        ) VALUES (
+            #{title},
+            #{content},
+            #{version},
+            #{status},
+            #{effectiveDate}
+        )
+    </insert>
+
+    <!-- 根据ID查询服务条款 -->
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM service_terms
+        WHERE id = #{id}
+    </select>
+
+    <!-- 更新服务条款 -->
+    <update id="update" parameterType="com.emailmanager.entity.ServiceTerms">
+        UPDATE service_terms
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="version != null">version = #{version},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="effectiveDate != null">effective_date = #{effectiveDate},</if>
+            updated_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除服务条款 -->
+    <delete id="deleteById">
+        DELETE FROM service_terms WHERE id = #{id}
+    </delete>
+
+    <!-- 查询所有服务条款 -->
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM service_terms
+        ORDER BY version DESC
+    </select>
+
+    <!-- 根据版本查询服务条款 -->
+    <select id="findByVersion" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM service_terms
+        WHERE version = #{version}
+    </select>
+
+    <!-- 根据状态查询服务条款 -->
+    <select id="findByStatus" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM service_terms
+        WHERE status = #{status}
+        ORDER BY version DESC
+    </select>
+
+    <!-- 查询当前生效的服务条款 -->
+    <select id="findCurrent" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM service_terms
+        WHERE status = 1
+        AND <![CDATA[ effective_date <= NOW() ]]>
+        ORDER BY version DESC
+        LIMIT 1
+    </select>
+
+    <!-- 查询指定日期生效的服务条款 -->
+    <select id="findByEffectiveDate" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM service_terms
+        WHERE status = 1
+        AND <![CDATA[ effective_date <= #{date} ]]>
+        ORDER BY version DESC
+        LIMIT 1
+    </select>
+
+    <!-- 更新服务条款状态 -->
+    <update id="updateStatus">
+        UPDATE service_terms
+        SET status = #{status},
+            updated_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 查询最新版本号 -->
+    <select id="findLatestVersion" resultType="java.lang.Integer">
+        SELECT MAX(version)
+        FROM service_terms
+    </select>
+</mapper> 

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.emailmanager.mapper.AnnouncementMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.emailmanager.entity.Announcement">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="publisher_id" property="publisherId"/>
+        <result column="status" property="status"/>
+        <result column="publish_time" property="publishTime"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, title, content, publisher_id, status, publish_time, created_time, updated_time
+    </sql>
+
+    <!-- 插入公告 -->
+    <insert id="insert" parameterType="com.emailmanager.entity.Announcement" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO announcements (
+            title, content, publisher_id, status, publish_time
+        ) VALUES (
+                     #{title}, #{content}, #{publisherId}, #{status}, #{publishTime}
+                 )
+    </insert>
+
+    <!-- 根据ID查询公告 -->
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM announcements
+        WHERE id = #{id}
+    </select>
+
+    <!-- 更新公告 -->
+    <update id="update" parameterType="com.emailmanager.entity.Announcement">
+        UPDATE announcements
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="publisherId != null">publisher_id = #{publisherId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="publishTime != null">publish_time = #{publishTime},</if>
+            updated_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除公告 -->
+    <delete id="deleteById">
+        DELETE FROM announcements WHERE id = #{id}
+    </delete>
+
+    <!-- 查询所有公告 -->
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM announcements
+        ORDER BY publish_time DESC
+    </select>
+
+    <!-- 根据发布者ID查询公告 -->
+    <select id="findByPublisherId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM announcements
+        WHERE publisher_id = #{publisherId}
+        ORDER BY publish_time DESC
+    </select>
+
+    <!-- 根据状态查询公告 -->
+    <select id="findByStatus" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM announcements
+        WHERE status = #{status}
+        ORDER BY publish_time DESC
+    </select>
+
+    <!-- 根据时间范围查询公告 -->
+    <select id="findByTimeRange" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM announcements
+        WHERE publish_time BETWEEN #{startTime} AND #{endTime}
+        ORDER BY publish_time DESC
+    </select>
+
+    <!-- 查询最新的公告 -->
+    <select id="findLatest" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM announcements
+        WHERE status = 1
+        ORDER BY publish_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- id="updateStatus" 的 <update> 标签已从此文件中移除 -->
+
+</mapper>

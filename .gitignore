@@ -1,0 +1,33 @@
+# 压缩文件
+*.zip
+*.rar
+*.tar.gz
+
+# Java 编译文件
+*.class
+target/
+*.jar
+*.war
+*.ear
+
+# IDE 文件
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp
+
+# 前端构建文件
+email-manager-frontend/node_modules/
+email-manager-frontend/dist/
+email-manager-frontend/.nuxt/
+email-manager-frontend/.output/
