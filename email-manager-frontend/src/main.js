@@ -10,6 +10,8 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 // --- 新增代码开始 ---
 import { createPinia } from 'pinia'
+import { useUserStore } from '@/stores/userStore'
+import { getProfileApi } from '@/api/user.js'
 // --- 新增代码结束 ---
 
 const app = createApp(App)
@@ -25,3 +27,11 @@ app.use(createPinia()) // 使用Pinia
 app.use(ElementPlus)
 app.use(router)
 app.mount('#app')
+
+const userStore = useUserStore()
+if (userStore.token) {
+  getProfileApi().catch(() => {
+    userStore.logout()
+    router.replace({ name: 'login' })
+  })
+}
