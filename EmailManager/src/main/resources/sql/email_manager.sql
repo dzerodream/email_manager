@@ -1,25 +1,10 @@
-/*
- Navicat Premium Dump SQL
-
- Source Server         : mydb405
- Source Server Type    : MySQL
- Source Server Version : 90200 (9.2.0)
- Source Host           : localhost:3306
- Source Schema         : email_manager
-
- Target Server Type    : MySQL
- Target Server Version : 90200 (9.2.0)
- File Encoding         : 65001
-
- Date: 25/06/2025 15:33:33
-*/
+CREATE DATABASE IF NOT EXISTS email_manager DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+USE email_manager;
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
--- ----------------------------
--- Table structure for announcements
--- ----------------------------
+-- 公告表
 DROP TABLE IF EXISTS `announcements`;
 CREATE TABLE `announcements`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '公告ID',
@@ -35,9 +20,7 @@ CREATE TABLE `announcements`  (
   INDEX `idx_status`(`status` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统公告表' ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for contacts
--- ----------------------------
+-- 通讯录表
 DROP TABLE IF EXISTS `contacts`;
 CREATE TABLE `contacts`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '联系人ID',
@@ -54,9 +37,7 @@ CREATE TABLE `contacts`  (
   INDEX `idx_email`(`email` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '通讯录表' ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for email_attachments
--- ----------------------------
+-- 邮件附件表
 DROP TABLE IF EXISTS `email_attachments`;
 CREATE TABLE `email_attachments`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '附件ID',
@@ -72,9 +53,7 @@ CREATE TABLE `email_attachments`  (
   CONSTRAINT `email_attachments_ibfk_1` FOREIGN KEY (`email_id`) REFERENCES `emails` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '邮件附件表' ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for email_recipients
--- ----------------------------
+-- 邮件收件人表
 DROP TABLE IF EXISTS `email_recipients`;
 CREATE TABLE `email_recipients`  (
   `id` bigint NOT NULL AUTO_INCREMENT,
@@ -86,9 +65,7 @@ CREATE TABLE `email_recipients`  (
   CONSTRAINT `fk_email_recipients_email_id` FOREIGN KEY (`email_id`) REFERENCES `emails` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '邮件收件人记录表' ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for emails
--- ----------------------------
+-- 邮件内容表
 DROP TABLE IF EXISTS `emails`;
 CREATE TABLE `emails`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '邮件ID',
@@ -105,9 +82,7 @@ CREATE TABLE `emails`  (
   CONSTRAINT `emails_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '邮件内容核心表' ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for holidays
--- ----------------------------
+-- 节假日表
 DROP TABLE IF EXISTS `holidays`;
 CREATE TABLE `holidays`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '节假日ID',
@@ -121,9 +96,7 @@ CREATE TABLE `holidays`  (
   UNIQUE INDEX `uk_date`(`holiday_date` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 78 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '节假日表' ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for mailbox
--- ----------------------------
+-- 用户邮箱条目表
 DROP TABLE IF EXISTS `mailbox`;
 CREATE TABLE `mailbox`  (
   `id` bigint NOT NULL AUTO_INCREMENT,
@@ -141,9 +114,7 @@ CREATE TABLE `mailbox`  (
   CONSTRAINT `mailbox_ibfk_2` FOREIGN KEY (`email_id`) REFERENCES `emails` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 36 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户邮箱条目表' ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for service_terms
--- ----------------------------
+-- 服务条款表
 DROP TABLE IF EXISTS `service_terms`;
 CREATE TABLE `service_terms`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '条款ID',
@@ -160,9 +131,7 @@ CREATE TABLE `service_terms`  (
   INDEX `idx_effective_date`(`effective_date` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '服务条款表' ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for spam_rules
--- ----------------------------
+-- 垃圾邮件规则表
 DROP TABLE IF EXISTS `spam_rules`;
 CREATE TABLE `spam_rules`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '规则ID',
@@ -179,9 +148,7 @@ CREATE TABLE `spam_rules`  (
   INDEX `idx_type`(`rule_type` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '垃圾邮件规则表' ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for users
--- ----------------------------
+-- 用户表
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户ID',

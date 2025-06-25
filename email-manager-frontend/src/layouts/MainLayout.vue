@@ -92,7 +92,9 @@
               style="margin-left: 15px; cursor: pointer;"
               @error="avatarLoadError" 
             >
-              <span v-if="!userStore.userInfo?.avatar || avatarError">{{ userStore.userInfo?.username?.charAt(0).toUpperCase() }}</span>
+              <template v-if="!userStore.userInfo?.avatar || avatarError">
+                <el-icon><UserFilled /></el-icon>
+              </template>
             </el-avatar>
             <template #dropdown>
               <el-dropdown-menu>

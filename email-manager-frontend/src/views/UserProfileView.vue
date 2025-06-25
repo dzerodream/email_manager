@@ -41,12 +41,15 @@
               :on-error="handleAvatarError"
               :before-upload="beforeAvatarUpload"
               name="file" 
+              @change="() => { avatarError = false }"
             >
-              <img v-if="avatarPreviewUrl || (userStore.userInfo && userStore.userInfo.avatar)" 
+              <img v-if="(avatarPreviewUrl || (userStore.userInfo && userStore.userInfo.avatar)) && !avatarError" 
                    :src="avatarPreviewUrl || getFullAvatarUrl(userStore.userInfo.avatar)" 
                    class="avatar" 
-                   alt="User Avatar"/>
-              <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+                   alt="User Avatar"
+                   @error="avatarError = true"
+              />
+              <el-icon v-else class="avatar-uploader-icon"><User /></el-icon>
             </el-upload>
             <div class="el-upload__tip">
               点击上方图片更换头像 (JPG/PNG, <2MB)
@@ -83,12 +86,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, reactive, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useUserStore } from '@/stores/userStore';
 import { getProfileApi, updateProfileApi, avatarUploadUrl, changePasswordApi } from '@/api/user.js';
-import { Plus } from '@element-plus/icons-vue';
+import { Plus, User } from '@element-plus/icons-vue';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -98,6 +101,7 @@ const submitProfileLoading = ref(false);
 const profileFormRef = ref(null);
 const avatarPreviewUrl = ref('');
 const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}` }));
+const avatarError = ref(false);
 
 const profileForm = reactive({
   id: null,
@@ -258,6 +262,9 @@ async function submitPasswordChange() {
 function goBack() {
   router.back();
 }
+
+// 保证每次切换头像或上传新头像时重置 avatarError
+watch([avatarPreviewUrl, () => userStore.userInfo?.avatar], () => { avatarError.value = false; });
 </script>
 
 <style scoped>

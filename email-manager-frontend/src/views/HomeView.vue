@@ -8,7 +8,13 @@
         <p>祝您工作顺利，心情愉快！</p>
       </div>
       <div class="user-avatar">
-        <img v-if="userInfo?.avatar" :src="getFullAvatarUrl(userInfo.avatar)" alt="avatar" />
+        <img
+          v-if="userInfo?.avatar && !avatarError"
+          :src="getFullAvatarUrl(userInfo.avatar)"
+          alt="avatar"
+          @error="avatarError = true"
+          style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;"
+        />
         <el-icon v-else size="48"><User /></el-icon>
       </div>
     </div>
@@ -73,6 +79,7 @@ const unreadCount = computed(() => inboxEmails.value.filter(email => !email.isRe
 const totalCount = computed(() => inboxEmails.value.length);
 const announcementCount = ref(0);
 const contactCount = ref(0);
+const avatarError = ref(false);
 
 async function fetchStats() {
   try {
