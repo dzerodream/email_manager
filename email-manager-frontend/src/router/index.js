@@ -22,6 +22,7 @@ import UserProfileView from '../views/UserProfileView.vue';
 import AnnouncementView from '../views/AnnouncementView.vue';
 import CalendarView from '../views/CalendarView.vue';
 import SpamRuleView from '../views/SpamRuleView.vue';
+import ServiceTermsView from '../views/ServiceTermsView.vue';
 import { useUserStore } from '@/stores/userStore'
 
 const routes = [
@@ -53,6 +54,7 @@ const routes = [
       { path: 'announcements', name: 'announcements', component: AnnouncementView },
       { path: 'calendar', name: 'calendar', component: CalendarView },
       { path: 'spam-rules', name: 'spam-rules', component: SpamRuleView },
+      { path: 'service-terms', name: 'service-terms', component: ServiceTermsView },
     ]
   }
 ]
